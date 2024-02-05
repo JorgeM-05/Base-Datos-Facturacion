@@ -67,14 +67,18 @@ CREATE TABLE client (
 CREATE TABLE invoice (
     invoice_id INT PRIMARY KEY AUTO_INCREMENT,
     client_id INT,
+    invoce_number VARCHAR(100),
     date DATE,
     type VARCHAR(50),
     status VARCHAR(50),
-    business_type VARCHAR(50),
     delivery_type VARCHAR(50),
     payment_method VARCHAR(50),
-    subtotal DECIMAL(10, 2),
-    total DECIMAL(10, 2),
+    gross_total DECIMAL(20, 2),
+    discounts DECIMAL(20, 2),
+    subtotal DECIMAL(20, 2),
+    total_vat DECIMAL(20, 2),
+    total DECIMAL(20, 2),
+    observation VARCHAR(200),
     employee_id varchar(50),
     
     FOREIGN KEY (client_id) REFERENCES client(client_id)
@@ -89,13 +93,13 @@ CREATE TABLE details_invoce(
 	category VARCHAR(50),
 	description VARCHAR(200),
 	quantity INT,
-	unit_price DECIMAL(10, 2),
-	percentage_discount DECIMAL(10, 2),
-	value_discount DECIMAL(10, 2),
-	tax DECIMAL(10, 2),
-	value_tax DECIMAL(10, 2),
-	sub_total DECIMAL(10, 2),
-	total DECIMAL(10, 2),
+	unit_price DECIMAL(20, 2),
+	percentage_discount DECIMAL(20, 2),
+	value_discount DECIMAL(20, 2),
+	tax DECIMAL(20, 2),
+	value_tax DECIMAL(20, 2),
+	sub_total DECIMAL(20, 2),
+	total DECIMAL(20, 2),
 	
 	FOREIGN KEY (invoice_id) REFERENCES invoice(invoice_id),
 	FOREIGN KEY (product_id) REFERENCES product(product_id)
@@ -118,26 +122,6 @@ CREATE TABLE category (
     name VARCHAR(255),
     description TEXT
 );
-
-
-
--- Agregar columnas a la tabla product
-ALTER TABLE product
-MODIFY COLUMN state BOOLEAN;
-ADD CONSTRAINT fk_branch_product FOREIGN KEY (branch_id) REFERENCES branch(branch_id);
-
-
-
-ALTER TABLE product
-ADD COLUMN discount_id INT,
-ADD COLUMN tax_id INT,
-ADD CONSTRAINT fk_discount_product FOREIGN KEY (discount_id) REFERENCES discount(discount_id),
-ADD CONSTRAINT fk_tax_product FOREIGN KEY (tax_id) REFERENCES tax(tax_id);
-
-
-
-
-
 
 -- impuestos
 CREATE TABLE tax (
