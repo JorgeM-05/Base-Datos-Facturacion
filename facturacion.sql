@@ -63,6 +63,26 @@ CREATE TABLE client (
     FOREIGN KEY (branch_id) REFERENCES branch(branch_id)
 );
 
+-- estados para metodo de pago
+CREATE TABLE payment_method(
+	id INT PRIMARY KEY,
+	name VARCHAR(50) UNIQUE
+);
+
+INSERT INTO payment_method(id,name)
+VALUES (1,'EFECTIVO'),(2,'TC MASTERCARD'),(3,'TC VISA'),(4,'CC MASTERCARD'),(5,'CC VISA'),(6,'TC AMEX')
+
+
+-- estados para la factura
+CREATE TABLE invoice_status (
+    status_id INT PRIMARY KEY,
+    state_name VARCHAR(50) UNIQUE
+);
+
+INSERT INTO invoice_status (status_id,state_name) 
+VALUES (1,'CREADO'),(2,'ENVIADO'),(3,'REENVIADO'),(4,'CANCELADO');
+
+
 -- facturacion
 CREATE TABLE invoice (
     invoice_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -70,7 +90,7 @@ CREATE TABLE invoice (
     invoce_number VARCHAR(100),
     date DATE,
     type VARCHAR(50),
-    status VARCHAR(50),
+    status_id INT NOT NULL,
     delivery_type VARCHAR(50),
     payment_method VARCHAR(50),
     gross_total DECIMAL(20, 2),
@@ -81,8 +101,10 @@ CREATE TABLE invoice (
     observation VARCHAR(200),
     employee_id varchar(50),
     
-    FOREIGN KEY (client_id) REFERENCES client(client_id)
+    FOREIGN KEY (client_id) REFERENCES client(client_id),
+    FOREIGN KEY (status_id) REFERENCES invoice_status(status_id)
 );
+
 
 CREATE TABLE details_invoce(
 	invoce_detail_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -122,6 +144,9 @@ CREATE TABLE category (
     name VARCHAR(255),
     description TEXT
 );
+
+
+
 
 -- impuestos
 CREATE TABLE tax (
@@ -184,26 +209,7 @@ CREATE TABLE inventory (
     -- FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
 );
 
--- detalle factura
-CREATE TABLE invoice_detail (
-    detail_id INT PRIMARY KEY AUTO_INCREMENT,
-    invoice_id INT,
-    product_id INT,
-    tax_id INT,
-    discount_id INT,
-    quantity INT,
-    unit_price DECIMAL(10, 2),
-    subtotal DECIMAL(10, 2),
-    FOREIGN KEY (invoice_id) REFERENCES invoice(invoice_id),
-    FOREIGN KEY (product_id) REFERENCES product(product_id)
-);
 
--- estado factura
-CREATE TABLE invoice_status (
-    status_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) UNIQUE,
-    description VARCHAR(100)
-);
 
 -- factura electronica
 CREATE TABLE electronic_invoice (
