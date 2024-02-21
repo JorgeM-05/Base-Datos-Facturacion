@@ -80,7 +80,7 @@ CREATE TABLE invoice_status (
 );
 
 INSERT INTO invoice_status (status_id,state_name) 
-VALUES (1,'CREADO'),(2,'ENVIADO'),(3,'REENVIADO'),(4,'CANCELADO');
+VALUES (1,'CREADO'),(2,'ENVIADO'),(3,'REENVIADO'),(4,'CANCELADO'),(5,'IN_PROCESS'),(6,'PENDING');
 
 
 -- facturacion
@@ -183,7 +183,8 @@ CREATE TABLE product (
     branch_id INT NOT NULL,
     category_id INT,
     discount_id INT, 
-    tax_id INT,  
+    tax_id INT,
+    stock_quantity INT NOT NULL, 
     
     FOREIGN KEY (category_id) REFERENCES category(category_id),
     FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id),
@@ -192,21 +193,21 @@ CREATE TABLE product (
     FOREIGN KEY (tax_id) REFERENCES tax(tax_id)   
     
 );
+ALTER TABLE product
+ADD COLUMN stock_quantity INT NOT NULL;
+
 
 -- inventario
 -- pendiente por definir la estructura
 CREATE TABLE inventory (
     inventory_id INT PRIMARY KEY AUTO_INCREMENT,
+    transaction_id VARCHAR(200),
     product_id INT,
-    supplier_id INT,
     quantity INT,
-    last_purchase_date DATE,
-    last_sale_date DATE,
-    total_purchases INT,
-    total_sales INT,
+    stock_quantity INT,
+    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (product_id) REFERENCES product(product_id)
-    -- FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id)
 );
 
 
@@ -214,12 +215,15 @@ CREATE TABLE inventory (
 -- factura electronica
 CREATE TABLE electronic_invoice (
     electronic_invoice_id INT PRIMARY KEY AUTO_INCREMENT,
-    invoice_id INT,
+    invoce_number VARCHAR(100) NOT NULL,
+    id_client int NOT NULL,
+    id_branch int NOT NULL,
     status_id INT,
     authorization_code VARCHAR(50),
-    authorization_date DATE,
+    create_at TIMESTAMP,
+    update_at TIMESTAMP,
     
-    FOREIGN KEY (invoice_id) REFERENCES invoice(invoice_id),
+   -- FOREIGN KEY (invoce_number) REFERENCES invoice(invoce_number),
     FOREIGN KEY (status_id) REFERENCES invoice_status(status_id)
 );
 
