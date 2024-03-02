@@ -1,202 +1,279 @@
+-- CREATE TABLES
+-- CUENTAS - AUTENTICACION
 -- compañia
 CREATE TABLE company (
-    company_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
-    nit VARCHAR(20) NOT NULL,
-    phone VARCHAR(15),
-    address VARCHAR(255)
+    cmp_id INT PRIMARY KEY AUTO_INCREMENT,
+    cmp_name VARCHAR(255) NOT NULL,
+    cmp_nit VARCHAR(20) NOT NULL,
+    cmp_phone VARCHAR(15),
+    cmp_address VARCHAR(255),
+    cmp_create_at TIMESTAMP,
+    cmp_update_at TIMESTAMP
 );
+
 -- localizacion
 CREATE TABLE location (
-    location_id INT PRIMARY KEY AUTO_INCREMENT,
-    department VARCHAR(100) NOT NULL,
-    city VARCHAR(255) NOT NULL
+    ltn_id INT PRIMARY KEY AUTO_INCREMENT,
+    ltn_department VARCHAR(100) NOT NULL,
+    ltn_city VARCHAR(255) NOT NULL,
+    ltn_create_at TIMESTAMP,
+    ltn_update_at TIMESTAMP
 );
 
 -- sucursales
 CREATE TABLE branch (
-    branch_id INT PRIMARY KEY AUTO_INCREMENT,
-    company_id INT NOT NULL,
-    location_id INT ,
-    name VARCHAR(255) NOT NULL,
-    address VARCHAR(255),
-    phone VARCHAR(15),
-    FOREIGN KEY (company_id) REFERENCES company(company_id),
-    FOREIGN KEY (location_id) REFERENCES location(location_id)
+    brn_id INT PRIMARY KEY AUTO_INCREMENT,
+    cmp_id INT NOT NULL,
+    ltn_id INT,
+    brn_name VARCHAR(255) NOT NULL,
+    brn_address VARCHAR(255),
+    brn_phone VARCHAR(15),
+    brn_create_at TIMESTAMP,
+    brn_update_at TIMESTAMP,
+    FOREIGN KEY (cmp_id) REFERENCES company(cmp_id),
+    FOREIGN KEY (ltn_id) REFERENCES location(ltn_id)
+);
+
+-- configuracion de cuerpo notificaciones 
+CREATE TABLE setup_branch (
+    stp_id INT PRIMARY KEY AUTO_INCREMENT,
+    brn_id INT NOT NULL,
+    stp_header_mail varchar(500) NOT NULL,
+    stp_body_mail varchar(2000) NOT NULL,
+    stp_footer_mail varchar(500) NOT NULL,
+    stp_subject_mail varchar(200) NOT NULL,
+    FOREIGN KEY (brn_id) REFERENCES branch(brn_id)
 );
 
 -- roles
-CREATE TABLE employee_role (
+CREATE TABLE customers_role (
     role_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) UNIQUE,
-    description TEXT
+    role_name VARCHAR(50) UNIQUE,
+    role_description ARCHAR(150)
 );
 
--- empleados
-CREATE TABLE employee (
-    employee_id INT PRIMARY KEY AUTO_INCREMENT,
-    branch_id INT NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(100),
-    id_card VARCHAR(20),
-    username VARCHAR(50) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role_id INT,
-    FOREIGN KEY (branch_id) REFERENCES branch(branch_id),
-    FOREIGN KEY (role_id) REFERENCES employee_role(role_id)
+CREATE TABLE users (
+    usr_id INT PRIMARY KEY AUTO_INCREMENT,
+    usr_email varchar(80) NOT NULL,
+    usr_password varchar(255) NOT NULL,
+    usr_create_at TIMESTAMP,
+    usr_update_at TIMESTAMP
 );
 
+-- Socio
+CREATE TABLE customers (
+    ctm_id INT PRIMARY KEY AUTO_INCREMENT,
+    brn_id INT NOT NULL,
+    cmp_id INT NOT NULL,
+    usr_id INT NOT NULL,
+    ctm_name varchar(80) NOT NULL,
+    ctm_last_name varchar(80) NOT NULL,
+    ctm_phone varchar(15),
+    ctm_card_id varchar(255) NOT NULL,
+    ctm_create_at TIMESTAMP,
+    ctm_update_at TIMESTAMP,
+    FOREIGN KEY (cmp_id) REFERENCES customers_role(cmp_id),
+    FOREIGN KEY (usr_id) REFERENCES users(usr_id),
+    FOREIGN KEY (brn_id) REFERENCES branch(brn_id)
+);
 
--- clientes
-CREATE TABLE client (
-    client_id INT PRIMARY KEY AUTO_INCREMENT,
-    branch_id INT,
-    type_document VARCHAR(50),
-    document_number VARCHAR(20),
-    first_name VARCHAR(255),
-    last_name VARCHAR(100),
-    address VARCHAR(255),
-    phone VARCHAR(15),
-    email VARCHAR(255),
-    client_type VARCHAR(50),
-    total_amount DECIMAL(10, 2),
-    FOREIGN KEY (branch_id) REFERENCES branch(branch_id)
+-- FACTURACION
+-- clientes finales
+CREATE TABLE client(
+    ctn_id INT PRIMARY KEY AUTO_INCREMENT,
+    brn_id INT NOT NULL,
+    ctn_type_document VARCHAR(50),
+    ctn_document_number VARCHAR(20),
+    ctn_first_name VARCHAR(255),
+    ctn_last_name VARCHAR(100),
+    ctn_address VARCHAR(255),
+    ctn_phone VARCHAR(15),
+    ctn_email VARCHAR(255),
+    ctn_client_type VARCHAR(50),
+    ctn_total_amount DECIMAL(10, 2),
+    ctn_create_at TIMESTAMP,
+    ctn_update_at TIMESTAMP,
+    FOREIGN KEY (brn_id) REFERENCES branch(brn_id)
 );
 
 -- estados para metodo de pago
 CREATE TABLE payment_method(
-	id INT PRIMARY KEY,
-	name VARCHAR(50) UNIQUE
+    pay_id INT PRIMARY KEY,
+    pay_name VARCHAR(50) UNIQUE,
+    pay_create_at TIMESTAMP,
+    pay_update_at TIMESTAMP,
 );
 
-INSERT INTO payment_method(id,name)
-VALUES (1,'EFECTIVO'),(2,'TC MASTERCARD'),(3,'TC VISA'),(4,'CC MASTERCARD'),(5,'CC VISA'),(6,'TC AMEX')
-
+INSERT INTO
+    payment_method(pay_id, pay_name, pay_create_at, pay_update_at)
+VALUES
+    (1, 'EFECTIVO', NULL, NULL),
+    (2, 'TC MASTERCARD', NULL, NULL),
+    (3, 'TC VISA', NULL, NULL),
+    (4, 'CC MASTERCARD', NULL, NULL),
+    (5, 'CC VISA', NULL, NULL),
+    (6, 'TC AMEX', NULL, NULL);
 
 -- estados para la factura
 CREATE TABLE invoice_status (
-    status_id INT PRIMARY KEY,
-    state_name VARCHAR(50) UNIQUE
+    istu_id INT PRIMARY KEY,
+    istu_name VARCHAR(50) UNIQUE,
+    istu_create_at TIMESTAMP,
+    istu_update_at TIMESTAMP
 );
 
-INSERT INTO invoice_status (status_id,state_name) 
-VALUES (1,'CREADO'),(2,'ENVIADO'),(3,'REENVIADO'),(4,'CANCELADO'),(5,'IN_PROCESS'),(6,'PENDING');
+INSERT INTO
+    invoice_status (
+        status_id,
+        state_name,
+        istu_create_at,
+        istu_update_at
+    )
+VALUES
+    (1, 'REGISTRADO', null, null),
+    -- se regstro en la BD
+    (2, 'PENDING', null, null),
+    -- se agrega a la cola
+    (3, 'ENVIADO', null, null),
+    -- se envio el correo
+    (4, 'SEND_FAIL', null, null),
+    -- error tecnico en el sistema de notificaciones
+    (5, 'ERROR_EMAIL', null, null);
 
-
+-- error en la direccion correo electronico
 -- facturacion
-CREATE TABLE invoice (
-    invoice_id INT PRIMARY KEY AUTO_INCREMENT,
-    client_id INT,
-    invoce_number VARCHAR(100),
-    date DATE,
-    type VARCHAR(50),
-    status_id INT NOT NULL,
-    delivery_type VARCHAR(50),
-    payment_method VARCHAR(50),
-    gross_total DECIMAL(20, 2),
-    discounts DECIMAL(20, 2),
-    subtotal DECIMAL(20, 2),
-    total_vat DECIMAL(20, 2),
-    total DECIMAL(20, 2),
-    observation VARCHAR(200),
-    employee_id varchar(50),
-    
-    FOREIGN KEY (client_id) REFERENCES client(client_id),
-    FOREIGN KEY (status_id) REFERENCES invoice_status(status_id)
+CREATE TABLE invoice(
+    inv_id INT PRIMARY KEY AUTO_INCREMENT,
+    ctn_id INT NOT NULL,
+    istu_id INT NOT NULL,
+    inv_invoce_number VARCHAR(100),
+    inv_date DATE,
+    inv_type VARCHAR(50),
+    inv_delivery_type VARCHAR(50),
+    inv_payment_method VARCHAR(50),
+    inv_gross_total DECIMAL(50, 2),
+    inv_discounts DECIMAL(50, 2),
+    inv_subtotal DECIMAL(50, 2),
+    inv_total_vat DECIMAL(50, 2),
+    inv_total DECIMAL(50, 2),
+    inv_observation VARCHAR(200),
+    inv_employee_id varchar(50),
+    FOREIGN KEY (ctn_id) REFERENCES client(ctn_id),
+    FOREIGN KEY (istu_id) REFERENCES invoice_status(istu_id)
 );
-
-
-CREATE TABLE details_invoce(
-	invoce_detail_id INT PRIMARY KEY AUTO_INCREMENT,
-	invoice_id INT NOT NULL,
-	product_id INT,
-	code VARCHAR(200),
-	name_product VARCHAR(50),
-	category VARCHAR(50),
-	description VARCHAR(200),
-	quantity INT,
-	unit_price DECIMAL(20, 2),
-	percentage_discount DECIMAL(20, 2),
-	value_discount DECIMAL(20, 2),
-	tax DECIMAL(20, 2),
-	value_tax DECIMAL(20, 2),
-	sub_total DECIMAL(20, 2),
-	total DECIMAL(20, 2),
-	
-	FOREIGN KEY (invoice_id) REFERENCES invoice(invoice_id),
-	FOREIGN KEY (product_id) REFERENCES product(product_id)
-);
-
-
 
 -- proveedor
-CREATE TABLE supplier (
-    supplier_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255),
-    nit VARCHAR(20),
-    address VARCHAR(255),
-    contact_person VARCHAR(100),
-    phone VARCHAR(15),
-    email VARCHAR(255)
-);
+-- Category
 CREATE TABLE category (
-    category_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255),
-    description TEXT
+    ctg_id INT PRIMARY KEY AUTO_INCREMENT,
+    ctg_name VARCHAR(255) NOT NULL,
+    ctg_description VARCHAR(255),
+    cmp_id INT NOT NULL,
 );
-
-
-
 
 -- impuestos
 CREATE TABLE tax (
     tax_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255),
-    description TEXT,
-    percentage DECIMAL(5, 2),
-    type VARCHAR(50)
+    tax_name VARCHAR(255),
+    tax_description VARCHAR(255),
+    tax_percentage DECIMAL(5, 2),
+    tax_type VARCHAR(50)
 );
 
 -- descuentos
 CREATE TABLE discount (
-    discount_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255),
-    description TEXT,
-    type VARCHAR(50),
-    percentage DECIMAL(5, 2)
+    dct_id INT PRIMARY KEY AUTO_INCREMENT,
+    dct_name VARCHAR(255) NOT NULL,
+    dct_description VARCHAR(255),
+    dct_type VARCHAR(50),
+    dct_percentage DECIMAL(5, 2)
+);
+
+-- proveedores
+CREATE TABLE supplier (
+    spl_id INT PRIMARY KEY AUTO_INCREMENT,
+    spl_name VARCHAR(255),
+    spl_nit VARCHAR(20),
+    spl_address VARCHAR(255),
+    spl_contact_person VARCHAR(100),
+    spl_phone VARCHAR(15),
+    spl_email VARCHAR(255)
 );
 
 -- productos
 CREATE TABLE product (
-    product_id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255),
-    description TEXT,
-    product_status VARCHAR(50),
-    barcode VARCHAR(50),
-    reference VARCHAR(50),
-    location VARCHAR(255) NULL,
-    unit_price DECIMAL(10, 2),
-    selling_price DECIMAL(10, 2),
-    state BOOLEAN,
-    
-    supplier_id INT NULL,
-    branch_id INT NOT NULL,
-    category_id INT,
-    discount_id INT, 
-    tax_id INT,
-    stock_quantity INT NOT NULL, 
-    
+    prd_id INT PRIMARY KEY AUTO_INCREMENT,
+    spl_id INT NULL,
+    brn_id INT NOT NULL,
+    ctg_id INT,
+    dct_id INT,
+    tax_id INT NOT NULL,
+    prd_name VARCHAR(255),
+    prd_description TEXT,
+    prd_status VARCHAR(50),
+    prd_barcode VARCHAR(50),
+    prd_reference VARCHAR(50),
+    prd_location VARCHAR(255) NULL,
+    prd_unit_price DECIMAL(10, 2),
+    prd_selling_price DECIMAL(10, 2),
+    prd_state BOOLEAN,
+    prd_stock_quantity INT NOT NULL,
     FOREIGN KEY (category_id) REFERENCES category(category_id),
     FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id),
-    FOREIGN KEY (branch_id) REFERENCES branch(branch_id),    
-    FOREIGN KEY (discount_id) REFERENCES discount(discount_id), -- Clave foránea para el descuento
-    FOREIGN KEY (tax_id) REFERENCES tax(tax_id)   
-    
+    FOREIGN KEY (branch_id) REFERENCES branch(branch_id),
+    FOREIGN KEY (discount_id) REFERENCES discount(discount_id),
+    FOREIGN KEY (tax_id) REFERENCES tax(tax_id)
 );
-ALTER TABLE product
-ADD COLUMN stock_quantity INT NOT NULL;
 
 
+
+-- detalle factura
+CREATE TABLE details_invoce(
+    dtl_id INT PRIMARY KEY AUTO_INCREMENT,
+    inv_id INT NOT NULL,
+    prd_id INT NOT NULL,
+    dtl_code VARCHAR(200),
+    dtl_name_product VARCHAR(50),
+    dtl_category VARCHAR(50),
+    dtl_description VARCHAR(200),
+    dtl_quantity INT,
+    dtl_unit_price DECIMAL(20, 2),
+    dtl_percentage_discount DECIMAL(20, 2),
+    dtl_value_discount DECIMAL(20, 2),
+    dtl_tax DECIMAL(20, 2),
+    dtl_value_tax DECIMAL(20, 2),
+    dtl_sub_total DECIMAL(20, 2),
+    dtl_total DECIMAL(20, 2),
+    FOREIGN KEY (inv_id) REFERENCES invoice(inv_id),
+    FOREIGN KEY (prd_id) REFERENCES product(prd_id)
+);
+
+-- factura electronica
+CREATE TABLE electronic_invoice (
+    eleci_id INT PRIMARY KEY AUTO_INCREMENT,
+    istu_id INT,
+    ctn_id int NOT NULL,
+    brn_id int NOT NULL,
+    eleci_invoce_number VARCHAR(100) NOT NULL,
+    eleci_response_code VARCHAR(50),
+    eleci_details_code VARCHAR(100),
+    eleci_create_at TIMESTAMP,
+    eleci_update_at TIMESTAMP,
+
+    FOREIGN KEY (statuistu_ids_id) REFERENCES invoice_status(istu_id)
+);
+
+-- historial de facturacion electronica
+-- POR DEFINIR
+CREATE TABLE invoice_status_history (
+    history_id INT PRIMARY KEY AUTO_INCREMENT,
+    inv_id INT,
+    old_status VARCHAR(50),
+    new_status VARCHAR(50),
+    change_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (inv_id) REFERENCES invoice(inv_id)
+);
 -- inventario
 -- pendiente por definir la estructura
 CREATE TABLE inventory (
@@ -206,36 +283,5 @@ CREATE TABLE inventory (
     quantity INT,
     stock_quantity INT,
     create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
     FOREIGN KEY (product_id) REFERENCES product(product_id)
 );
-
-
-
--- factura electronica
-CREATE TABLE electronic_invoice (
-    electronic_invoice_id INT PRIMARY KEY AUTO_INCREMENT,
-    invoce_number VARCHAR(100) NOT NULL,
-    id_client int NOT NULL,
-    id_branch int NOT NULL,
-    status_id INT,
-    authorization_code VARCHAR(50),
-    create_at TIMESTAMP,
-    update_at TIMESTAMP,
-    
-   -- FOREIGN KEY (invoce_number) REFERENCES invoice(invoce_number),
-    FOREIGN KEY (status_id) REFERENCES invoice_status(status_id)
-);
-
--- historial de facturacion electronica
-CREATE TABLE invoice_status_history (
-    history_id INT PRIMARY KEY AUTO_INCREMENT,
-    invoice_id INT,
-    old_status VARCHAR(50),
-    new_status VARCHAR(50),
-    change_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    -- Puedes agregar más columnas según tus necesidades
-    FOREIGN KEY (invoice_id) REFERENCES invoice(invoice_id)
-);
-
-
