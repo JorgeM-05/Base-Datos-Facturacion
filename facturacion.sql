@@ -271,7 +271,7 @@ CREATE TABLE invoice_status_history (
     old_status VARCHAR(50),
     new_status VARCHAR(50),
     change_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
+    
     FOREIGN KEY (inv_id) REFERENCES invoice(inv_id)
 );
 -- inventario
