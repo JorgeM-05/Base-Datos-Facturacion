@@ -49,7 +49,7 @@ CREATE TABLE setup_branch (
 CREATE TABLE customers_role (
     role_id INT PRIMARY KEY AUTO_INCREMENT,
     role_name VARCHAR(50) UNIQUE,
-    role_description ARCHAR(150)
+    role_description VARCHAR(150)
 );
 
 CREATE TABLE users (
@@ -64,7 +64,7 @@ CREATE TABLE users (
 CREATE TABLE customers (
     ctm_id INT PRIMARY KEY AUTO_INCREMENT,
     brn_id INT NOT NULL,
-    cmp_id INT NOT NULL,
+    role_id INT NOT NULL,
     usr_id INT NOT NULL,
     ctm_name varchar(80) NOT NULL,
     ctm_last_name varchar(80) NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE customers (
     ctm_card_id varchar(255) NOT NULL,
     ctm_create_at TIMESTAMP,
     ctm_update_at TIMESTAMP,
-    FOREIGN KEY (cmp_id) REFERENCES customers_role(cmp_id),
+    FOREIGN KEY (role_id) REFERENCES customers_role(role_id),
     FOREIGN KEY (usr_id) REFERENCES users(usr_id),
     FOREIGN KEY (brn_id) REFERENCES branch(brn_id)
 );
@@ -101,7 +101,7 @@ CREATE TABLE payment_method(
     pay_id INT PRIMARY KEY,
     pay_name VARCHAR(50) UNIQUE,
     pay_create_at TIMESTAMP,
-    pay_update_at TIMESTAMP,
+    pay_update_at TIMESTAMP
 );
 
 INSERT INTO
@@ -124,8 +124,8 @@ CREATE TABLE invoice_status (
 
 INSERT INTO
     invoice_status (
-        status_id,
-        state_name,
+        istu_id,
+        istu_name,
         istu_create_at,
         istu_update_at
     )
@@ -168,7 +168,7 @@ CREATE TABLE category (
     ctg_id INT PRIMARY KEY AUTO_INCREMENT,
     ctg_name VARCHAR(255) NOT NULL,
     ctg_description VARCHAR(255),
-    cmp_id INT NOT NULL,
+    cmp_id INT NOT NULL
 );
 
 -- impuestos
@@ -218,14 +218,26 @@ CREATE TABLE product (
     prd_selling_price DECIMAL(10, 2),
     prd_state BOOLEAN,
     prd_stock_quantity INT NOT NULL,
-    FOREIGN KEY (category_id) REFERENCES category(category_id),
-    FOREIGN KEY (supplier_id) REFERENCES supplier(supplier_id),
-    FOREIGN KEY (branch_id) REFERENCES branch(branch_id),
-    FOREIGN KEY (discount_id) REFERENCES discount(discount_id),
+    FOREIGN KEY (ctg_id) REFERENCES category(ctg_id),
+    FOREIGN KEY (spl_id) REFERENCES supplier(spl_id),
+    FOREIGN KEY (brn_id) REFERENCES branch(brn_id),
+    FOREIGN KEY (dct_id) REFERENCES discount(dct_id),
     FOREIGN KEY (tax_id) REFERENCES tax(tax_id)
 );
 
-
+-- Historial de productos
+CREATE TABLE product_History (
+    prdH_id INT AUTO_INCREMENT PRIMARY KEY,
+    prd_id INT,
+    prdH_transaction_id VARCHAR(200),
+    prdH_transaction_date TIMESTAMP,
+    prdH_event_Type VARCHAR(50),
+    prdH_previous_quantity INT,
+    prdH_current_quantity INT,
+    prdH_reason TEXT,
+    -- employe VARCHAR(100), -- por definir fk
+    FOREIGN KEY (prd_id) REFERENCES product(prd_id)
+);
 
 -- detalle factura
 CREATE TABLE details_invoce(
@@ -260,12 +272,12 @@ CREATE TABLE electronic_invoice (
     eleci_create_at TIMESTAMP,
     eleci_update_at TIMESTAMP,
 
-    FOREIGN KEY (statuistu_ids_id) REFERENCES invoice_status(istu_id)
+    FOREIGN KEY (istu_id) REFERENCES invoice_status(istu_id)
 );
 
 -- historial de facturacion electronica
 -- POR DEFINIR
-CREATE TABLE invoice_status_history (
+/*CREATE TABLE invoice_status_history (
     history_id INT PRIMARY KEY AUTO_INCREMENT,
     inv_id INT,
     old_status VARCHAR(50),
@@ -274,14 +286,5 @@ CREATE TABLE invoice_status_history (
     
     FOREIGN KEY (inv_id) REFERENCES invoice(inv_id)
 );
--- inventario
--- pendiente por definir la estructura
-CREATE TABLE inventory (
-    inventory_id INT PRIMARY KEY AUTO_INCREMENT,
-    transaction_id VARCHAR(200),
-    product_id INT,
-    quantity INT,
-    stock_quantity INT,
-    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES product(product_id)
-);
+*/
+
