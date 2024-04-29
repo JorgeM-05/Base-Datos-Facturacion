@@ -1,5 +1,6 @@
 -- CREATE TABLES
 -- CUENTAS - AUTENTICACION
+
 -- compañia
 CREATE TABLE company (
     cmp_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -51,7 +52,7 @@ CREATE TABLE customers_role (
     role_name VARCHAR(50) UNIQUE,
     role_description VARCHAR(150)
 );
-
+-- users 
 CREATE TABLE users (
     usr_id INT PRIMARY KEY AUTO_INCREMENT,
     usr_email varchar(80) NOT NULL,
@@ -60,7 +61,7 @@ CREATE TABLE users (
     usr_update_at TIMESTAMP
 );
 
--- Socio
+-- Socio - Employeed
 CREATE TABLE customers (
     ctm_id INT PRIMARY KEY AUTO_INCREMENT,
     brn_id INT NOT NULL,
@@ -103,7 +104,6 @@ CREATE TABLE payment_method(
     pay_create_at TIMESTAMP,
     pay_update_at TIMESTAMP
 );
-
 INSERT INTO
     payment_method(pay_id, pay_name, pay_create_at, pay_update_at)
 VALUES
@@ -130,7 +130,7 @@ INSERT INTO
         istu_update_at
     )
 VALUES
-    (1, 'REGISTRADO', null, null),
+    (1, 'REGISTRADO', DEFAULT CURRENT_TIMESTAMP, null),
     -- se regstro en la BD
     (2, 'PENDING', null, null),
     -- se agrega a la cola
@@ -141,6 +141,7 @@ VALUES
     (5, 'ERROR_EMAIL', null, null);
 
 -- error en la direccion correo electronico
+   
 -- facturacion
 CREATE TABLE invoice(
     inv_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -163,13 +164,16 @@ CREATE TABLE invoice(
 );
 
 -- proveedor
+
 -- Category
 CREATE TABLE category (
     ctg_id INT PRIMARY KEY AUTO_INCREMENT,
     ctg_name VARCHAR(255) NOT NULL,
     ctg_description VARCHAR(255),
-    cmp_id INT NOT NULL
+    brn_id INT NOT NULL,
+    FOREIGN KEY (brn_id) REFERENCES branch(brn_id)
 );
+
 
 -- impuestos
 CREATE TABLE tax (
@@ -186,7 +190,7 @@ CREATE TABLE discount (
     dct_name VARCHAR(255) NOT NULL,
     dct_description VARCHAR(255),
     dct_type VARCHAR(50),
-    dct_percentage DECIMAL(5, 2)
+    dct_percentage DECIMAL(5,2)
 );
 
 -- proveedores
@@ -205,9 +209,10 @@ CREATE TABLE product (
     prd_id INT PRIMARY KEY AUTO_INCREMENT,
     spl_id INT NULL,
     brn_id INT NOT NULL,
-    ctg_id INT,
-    dct_id INT,
+    ctg_id INT NULL,
+    dct_id INT NULL,
     tax_id INT NOT NULL,
+    
     prd_name VARCHAR(255),
     prd_description TEXT,
     prd_status VARCHAR(50),
@@ -226,18 +231,20 @@ CREATE TABLE product (
 );
 
 -- Historial de productos
-CREATE TABLE product_History (
+CREATE TABLE product_history (
     prdH_id INT AUTO_INCREMENT PRIMARY KEY,
     prd_id INT,
     prdH_transaction_id VARCHAR(200),
     prdH_transaction_date TIMESTAMP,
-    prdH_event_Type VARCHAR(50),
+    prdH_event_type VARCHAR(50),
     prdH_previous_quantity INT,
     prdH_current_quantity INT,
     prdH_reason TEXT,
     -- employe VARCHAR(100), -- por definir fk
     FOREIGN KEY (prd_id) REFERENCES product(prd_id)
 );
+
+
 
 -- detalle factura
 CREATE TABLE details_invoce(
@@ -288,3 +295,71 @@ CREATE TABLE electronic_invoice (
 );
 */
 
+
+
+
+-- SQL para el manejo de inventarios 
+
+-- productos -inventario
+CREATE TABLE products_inventory(
+	prdIn_id INT PRIMARY KEY AUTO_INCREMENT,
+	ctg_id INT NULL,
+	spl_id INT NULL,
+	
+	prdIn_name VARCHAR(255),
+    prdIn_description TEXT,
+    prdIn_status VARCHAR(50),
+    prdIn_barcode VARCHAR(50),
+    prdIn_reference VARCHAR(50),
+    prdIn_location VARCHAR(255) NULL,
+    prdIn_unit_price DECIMAL(10, 2),
+    prdIn_selling_price DECIMAL(10, 2),
+    prd_stock_quantity INT NOT NULL,
+	prdIn_entry_date TIMESTAMP,
+	prdIn_exit_date TIMESTAMP,
+	
+	
+	FOREIGN KEY (ctg_id) REFERENCES category(ctg_id),
+	FOREIGN KEY (spl_id) REFERENCES supplier(spl_id)
+);
+
+CREATE TABLE type_movements(
+	tm_id INT PRIMARY KEY,
+	tm_name VARCHAR(50) UNIQUE,
+	tm_create_at TIMESTAMP,
+    tm_update_at TIMESTAMP
+);
+
+INSERT INTO type_movements(tm_id,tm_name,tm_create_at,tm_update_at)
+VALUES(1,'INGRESO',CURRENT_TIMESTAMP,null),
+(2,'EGRESO',CURRENT_TIMESTAMP, null),
+(3,'TRANFERENCIA',CURRENT_TIMESTAMP, null)
+
+
+-- movimientos productos
+CREATE TABLE product_movements(
+	pmv_id INT PRIMARY KEY AUTO_INCREMENT,
+	prdIn_id INT NOT NULL,
+	prd_id INT NOT NULL,
+	tm_id INT NULL,
+	pmv_quantity INT NOT NULL,
+	transaction_date TIMESTAMP,
+	
+	FOREIGN KEY (prd_id) REFERENCES product(prd_id),
+	FOREIGN KEY (prdIn_id) REFERENCES products_inventory(prdIn_id),
+	FOREIGN KEY (tm_id) REFERENCES type_movements(tm_id)
+);
+
+
+-- tabla para pedidos
+CREATE TABLE orders(
+	ord_id INT PRIMARY KEY AUTO_INCREMENT,
+	spl_id INT NOT NULL,
+	
+	ord_date TIMESTAMP,
+	ord_date_delivery TIMESTAMP,
+	ord_status INT NULL,
+	ord_quantity INT NOT NULL,
+	
+	FOREIGN KEY (spl_id) REFERENCES supplier(spl_id)
+);
