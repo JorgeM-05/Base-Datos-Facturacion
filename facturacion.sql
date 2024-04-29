@@ -224,7 +224,6 @@ CREATE TABLE product (
     prd_state BOOLEAN,
     prd_stock_quantity INT NOT NULL,
     FOREIGN KEY (ctg_id) REFERENCES category(ctg_id),
-    FOREIGN KEY (spl_id) REFERENCES supplier(spl_id),
     FOREIGN KEY (brn_id) REFERENCES branch(brn_id),
     FOREIGN KEY (dct_id) REFERENCES discount(dct_id),
     FOREIGN KEY (tax_id) REFERENCES tax(tax_id)
@@ -294,6 +293,11 @@ CREATE TABLE electronic_invoice (
     FOREIGN KEY (inv_id) REFERENCES invoice(inv_id)
 );
 */
+
+
+
+
+
 
 
 
